@@ -5,7 +5,7 @@ shinyUI(dashboardPage(
   dashboardHeader(title = "Retail Analytics"),
 
   # Sidebar with a slider input for number of bins
-
+ 
     dashboardSidebar(
       h3("Door Traffic"),
       # Select Justices name here
