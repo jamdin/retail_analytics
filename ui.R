@@ -1,12 +1,12 @@
 #user interface for Mall Data
-shinyUI(fluidPage(
+shinyUI(dashboardPage(
 
   # Application title
-  titlePanel("Retail Analytics"),
+  dashboardHeader(title = "Retail Analytics"),
 
   # Sidebar with a slider input for number of bins
 
-    sidebarPanel(
+    dashboardSidebar(
       h3("Door Traffic"),
       # Select Justices name here
       selectizeInput("door",
@@ -21,16 +21,37 @@ shinyUI(fluidPage(
                   ),
 
 
-      # Term plot
-      plotOutput("termPlot", height = 200),
+      dateRangeInput('dateRange',
+      label = 'Date range input:',
+      start = as.Date("2017-07-01"), end = Sys.Date()
+      ),
+      checkboxGroupInput("weekdays_checked", "Weekdays:",
 
-      helpText("Data from Mall collected in July 2017")
+                         choices = c("Monday",
+                           "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
+                           selected = c("Monday",
+                             "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+        )
     ),
 
     # Show a plot of the generated distribution
-    mainPanel(
-      plotlyOutput("dayPlot"),
-      plotlyOutput("hourPlot")
+
+    dashboardBody(
+               tabsetPanel(
+                  tabPanel("Insights", valueBoxOutput("totalCount"),
+                                       valueBoxOutput("weekendPerc"),
+                                       valueBoxOutput("busiestHour"),
+                                       valueBoxOutput("busiestDoor"),
+                                       valueBoxOutput("busiestDay"),
+                                       valueBoxOutput("week2week"),
+                                       valueBoxOutput("year2year")),
+                  tabPanel("Day", plotlyOutput("dayPlot", height = 500)),
+                  tabPanel("Hour", plotlyOutput("hourPlot",  height = 500)),
+                  tabPanel("Weekday", plotlyOutput("weekdayPlot",  height = 500))
+
     )
-  )
+    )
+
+)
 )
