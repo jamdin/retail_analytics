@@ -28,6 +28,7 @@ shinyUI(dashboardPage(
 
     dashboardBody(
               useShinyjs(),
+              tags$head(tags$style(HTML('.info-box-icon {width: 50%,} .info-box-content {padding-top: 10%; padding-bottom: 10%;}'))),
               fluidRow(
               column(6,uiOutput("dateChoices")),
               column(6,selectizeInput("door",
@@ -42,17 +43,23 @@ shinyUI(dashboardPage(
                           )),
             div(id="tabs",
                 fluidRow(
-                    infoBoxOutput("totalCount", width = 3),
-                    infoBoxOutput("year2year", width = 3),
-                    infoBoxOutput("week2week", width = 3),
-                    infoBoxOutput("weekendPerc", width = 3),
-                    infoBoxOutput("busiestDoor", width = 3)
+                    # infoBoxOutput("totalCount", width = 2),
+                    # infoBoxOutput("year2year", width = 2),
+                    # infoBoxOutput("week2week", width = 2),
+                    box(title = "Total Visitors", textOutput("totalCount_txt"), status = "info", width = 2),
+                    #box(title = "YoY", textOutput("year2year_txt"), status = "info", width = 2)
+                    uiOutput("year2year_txt"),
+                    uiOutput("week2week_txt"),
+                    infoBoxOutput("weekendPerc", width = 2),
+                    infoBoxOutput("busiestDoor", width = 2)
 
 
-                )
-                ),
+                    )
+            ),
+
                 fluidRow(
-                column(6,plotlyOutput("week2weekPlot")))
+                column(6,plotlyOutput("week2weekPlot")),
+                column(6,plotlyOutput("heatMapPlot")))
     #           div(id = "tabs",
     #            tabsetPanel(
     #               tabPanel("Insights", infoBoxOutput("totalCount"),
