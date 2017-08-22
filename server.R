@@ -1,5 +1,7 @@
 library(ggthemes)
 library(scales)
+library(grid)
+
 
 shinyServer(function(input, output, session) {
 
@@ -19,6 +21,16 @@ shinyServer(function(input, output, session) {
       filter(Weekday %in% input$weekdays_checked)
       cw
       })
+
+sales_week <- reactive({
+    dateChoices <- input$dateChoices
+    weekYear <- strsplit(dateChoices, " ")[[1]][1]
+
+    sw <- sales_Data  %>% filter(Door %in% input$door) %>%
+    filter(strftime(Date, format = "%Y-%W", tz = "PST8PDT")==weekYear) %>%
+    filter(Weekday %in% input$weekdays_checked)
+    sw
+    })
 
 observe({
         #Hide insights panel until there are doors and dates chosen
@@ -297,16 +309,29 @@ output$week2weekPlot <- renderPlotly({
 
     maxWeek = weekYear
 
+    #Sales
+    df_sales_agg <- sales_Data  %>% filter(Door %in% input$door) %>%
+    filter(strftime(Date, format = "%Y-%W", tz = "PST8PDT")<=maxWeek &
+         strftime(Date, format = "%Y-%W", tz = "PST8PDT")>=minWeek) %>%
+    filter(Weekday %in% input$weekdays_checked)
+    df_sales_agg$yearWeek <- strftime(df_sales_agg$Date, format = "%Y-%W", tz = "PST8PDT")
+    df_agg_sales <- aggregate(Sales~yearWeek+Door, data = df_sales_agg, sum)
+
+    #Count
     df_trend_agg <- mall_Data  %>% filter(Door %in% input$door) %>%
     filter(strftime(Date, format = "%Y-%W", tz = "PST8PDT")<=maxWeek &
          strftime(Date, format = "%Y-%W", tz = "PST8PDT")>=minWeek) %>%
     filter(Weekday %in% input$weekdays_checked)
     df_trend_agg$yearWeek <- strftime(df_trend_agg$Date, format = "%Y-%W", tz = "PST8PDT")
-    df_agg <- aggregate(Count~yearWeek+Door, data = df_trend_agg, sum)
+    df_agg_count <- aggregate(Count~yearWeek+Door, data = df_trend_agg, sum)
 
-    gg_week <- ggplot(data = df_agg, aes(x = yearWeek, y = Count, fill = Door))+
-    geom_col(position = "dodge") + theme(panel.grid.major = element_blank(),
+    df_agg <- merge(df_agg_sales, df_agg_count)
+    gg_week <- ggplot(data = df_agg, aes(x = yearWeek, fill = Door))+
+    geom_col(aes(y = Count), position = "dodge") + theme(panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(), panel.background = element_blank()) + xlab("Week")+ggtitle("Weekly View")
+
+    # gg_week <- gg_week + geom_path(aes(y = Sales, group = Door, color = Door)) +
+    #         scale_y_continuous(sec.axis = sec_axis(~.*1, name = "Sales [$]"))
 
     gg_week
     }
@@ -359,6 +384,30 @@ output$heatMapPlot <- renderPlotly({
 
 })
 
+
+### Sales Data
+
+output$totalSales_txt <- renderText({
+    if (length(input$door)==0 || input$dateChoices==""){ "0"
+    }
+
+    else{
+    totalCount = sum(sales_week()$Sales)
+    paste("$",prettyNum(totalCount, big.mark=","))
+    }
+})
+
+output$RPV_txt <- renderText({
+    if (length(input$door)==0 || input$dateChoices==""){ "0"
+    }
+
+    else{
+    total_visitors = sum(current_week()$Count)
+    total_sales = sum(sales_week()$Sales)
+    RPV = round(total_sales/total_visitors,2)
+    paste("$",prettyNum(RPV, big.mark=","))
+    }
+})
 
 
 

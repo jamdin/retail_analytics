@@ -50,8 +50,8 @@ shinyUI(dashboardPage(
                     #box(title = "YoY", textOutput("year2year_txt"), status = "info", width = 2)
                     uiOutput("year2year_txt"),
                     uiOutput("week2week_txt"),
-                    infoBoxOutput("weekendPerc", width = 2),
-                    infoBoxOutput("busiestDoor", width = 2)
+                    box(title = "Total Sales", textOutput("totalSales_txt"), status = "info", width = 2),
+                    box(title = "Average Revenue per Visitor", textOutput("RPV_txt"), status = "info", width = 3)
 
 
                     )
